@@ -348,7 +348,7 @@ namespace TSP
             } 
         }
 
-        public void mutate(List<List<int>> parents, double likelihood, int numSwaps)
+        public void mutate(List<List<int>> parents, int numSwaps, double likelihood = 0.5)
         {
             Random r = new Random();
             foreach (List<int> parent in parents)
@@ -357,8 +357,14 @@ namespace TSP
                 {
                     for (int i = 0; i < numSwaps; i++)
                     {
-                        int swapIndex1 = r.Next();
-                        int swapIndex2 = r.Next();
+                        int swapIndex1 = r.Next(Cities.Length);
+                        int swapIndex2 = r.Next(Cities.Length);
+
+                        if(swapIndex1 == swapIndex2)
+                        {
+                            i--;
+                            continue;
+                        }
 
                         int temp = parent[swapIndex1];
                         parent[swapIndex1] = parent[swapIndex2];
