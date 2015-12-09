@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
+using System.Diagnostics;
 
 namespace TSP
 {
@@ -269,6 +270,20 @@ namespace TSP
         }
 
         /// <summary>
+        ///  Helper method that updates the appropriate text fields on the form. 
+        /// </summary>
+        /// <returns></returns>
+        private void updateForm(Stopwatch timer = null)
+        {
+            Program.MainForm.tbCostOfTour.Text = " " + this.costOfBssf();
+
+            if (timer != null)
+                Program.MainForm.tbElapsedTime.Text = timer.Elapsed.TotalSeconds.ToString();
+
+            Program.MainForm.Invalidate();
+        }
+
+        /// <summary>
         ///  return the cost of the best solution so far. 
         /// </summary>
         /// <returns></returns>
@@ -278,6 +293,49 @@ namespace TSP
                 return (bssf.costOfRoute());
             else
                 return -1D; 
+        }
+
+        public void greedySolution(bool usingForBssf = false)
+        {
+            bool valid = false;
+            Random r = new Random();
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+
+            while (!valid)
+            {
+                Route.Clear();
+                int currentIndex = r.Next(Cities.Length);
+                Route.Add(Cities[currentIndex]);
+
+                while (Route.Count != Cities.Length)
+                {
+                    double minDist = double.MaxValue;
+
+                    for (int i = 0; i < Cities.Length; i++)
+                    {
+                        if (Route.Contains(Cities[i]))
+                            continue;
+
+                        double dist = Cities[currentIndex].costToGetTo(Cities[i]);
+
+                        if (dist < minDist)
+                        {
+                            minDist = dist;
+                            currentIndex = i;
+                        }
+                    }
+                    Route.Add(Cities[currentIndex]);
+                }
+
+                bssf = new TSPSolution(Route);
+                valid = bssf.costOfRoute() != double.PositiveInfinity;
+            }
+            timer.Stop();
+
+            if (!usingForBssf)
+                updateForm(timer);
+            return;
         }
 
         /// <summary>
