@@ -21,10 +21,18 @@ namespace TSP
             /// for your node data structure and search algorithm. 
             /// </summary>
             public ArrayList Route;
+            public double cost {
+                get
+                {
+                    if (cost == double.PositiveInfinity) cost = costOfRoute();
+                    return cost;
+                }
+                set { } }            
 
             public TSPSolution(ArrayList iroute)
             {
                 Route = new ArrayList(iroute);
+                cost = double.PositiveInfinity;
             }
 
             /// <summary>
@@ -309,14 +317,55 @@ namespace TSP
 
         public PriorityQueue<int[]> createQueue(Double multiplier)
         {
+            //TODO: Should write method for adding into queues
             PriorityQueue<int[]> pQueue = new PriorityQueue<int[]>();
             pQueue.shelf = (int)Math.Floor(this.greedySolutionCost * multiplier);
             return pQueue;
         }
 
-        public void crossOver(ref int[] mom, ref int[] dad)
+        public void crossOver(List<List<int>> parents, int numSwaps)
         {
+            Random r = new Random();
+            while(parents.Count > 1)
+            {
+                List<int> child1 = new List<int>(parents[0]);
+                List<int> child2 = new List<int>(parents[1]);
 
+                parents.RemoveAt(0);
+                parents.RemoveAt(1);
+
+                for (int i = 0; i < numSwaps; i++)
+                {
+                    int swapIndex = r.Next(Cities.Length);
+                    int temp = 0;
+
+                    temp = child1[swapIndex];
+                    child1[swapIndex] = child2[swapIndex];
+                    child2[swapIndex] = temp;
+                }
+
+                //TODO: push children into queues.
+            } 
+        }
+
+        public void mutate(List<List<int>> parents, double likelihood, int numSwaps)
+        {
+            Random r = new Random();
+            foreach (List<int> parent in parents)
+            {
+                if(r.NextDouble() < likelihood)
+                {
+                    for (int i = 0; i < numSwaps; i++)
+                    {
+                        int swapIndex1 = r.Next();
+                        int swapIndex2 = r.Next();
+
+                        int temp = parent[swapIndex1];
+                        parent[swapIndex1] = parent[swapIndex2];
+                        parent[swapIndex2] = temp;
+                    }
+                }
+            }
         }
 
         /// <summary>
