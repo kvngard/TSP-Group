@@ -150,14 +150,13 @@ namespace TSP
         private void dToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.reset();
-
             CityData.solveProblem();
         }
 
         private void greedyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // TODO: Add a hook into your own implementation here.
-            throw new NotImplementedException();
+            this.reset();
+            CityData.greedySolution();
         }
 
         private void bBToolStripMenuItem_Click(object sender, EventArgs e)
