@@ -322,10 +322,11 @@ namespace TSP
             return pQueue;
         }
 
-        public void crossOver(List<List<int>> parents, int numSwaps)
+        public List<List<int>> crossOver(List<List<int>> parents, int numSwaps)
         {
             Random r = new Random();
-            while(parents.Count > 1)
+            List<List<int>> children = new List<List<int>>();
+            while (parents.Count > 1)
             {
                 List<int> child1 = new List<int>(parents[0]);
                 List<int> child2 = new List<int>(parents[1]);
@@ -342,9 +343,10 @@ namespace TSP
                     child1[swapIndex] = child2[swapIndex];
                     child2[swapIndex] = temp;
                 }
-
-                //TODO: push children into queues.
-            } 
+                children.Add(child1);
+                children.Add(child2);
+            }
+            return children;
         }
 
         public void mutate(List<List<int>> parents, int numSwaps, double likelihood = 0.5)
@@ -494,24 +496,6 @@ namespace TSP
 
 		}
 
-        public List<List<int>> drawParents(int numParents)
-        {
-            List<List<int>> parents = new List<List<int>>();
-            Random r = new Random();
-            for(int i = 0; i < numParents; i++)
-            {
-                double swtch = r.NextDouble();
-
-                if (swtch < 0.5) parents.Add(queues[0].RemoveMin());
-                else if (swtch < 0.7) parents.Add(queues[1].RemoveMin());
-                else if (swtch < 0.85) parents.Add(queues[2].RemoveMin());
-                else if (swtch < 0.97) parents.Add(queues[3].RemoveMin());
-                else if (swtch < 0.99) parents.Add(queues[4].RemoveMin());
-
-            }
-            return parents;
-        } 
-
 		public Double evaluate(List<int> route)
 		{
 			Double totalCost = 0;
@@ -523,6 +507,24 @@ namespace TSP
 			}
 			return totalCost;
 		}
+
+        public List<List<int>> drawParents(int numParents)
+        {
+            List<List<int>> parents = new List<List<int>>();
+            Random r = new Random();
+            for (int i = 0; i < numParents; i++)
+            {
+                double swtch = r.NextDouble();
+
+                if (swtch < 0.5) parents.Add(queues[0].RemoveMin());
+                else if (swtch < 0.7) parents.Add(queues[1].RemoveMin());
+                else if (swtch < 0.85) parents.Add(queues[2].RemoveMin());
+                else if (swtch < 0.97) parents.Add(queues[3].RemoveMin());
+                else if (swtch < 0.99) parents.Add(queues[4].RemoveMin());
+
+            }
+            return parents;
+        }
 
         /// <summary>
         ///  solve the problem.  This is the entry point for the solver when the run button is clicked
