@@ -7,7 +7,6 @@ namespace TSP
     class MinHeap<T> where T : IComparable<T>
     {
         private List<T> array = new List<T>();
-
         public void Add(T element)
         {
             array.Add(element);
@@ -66,7 +65,9 @@ namespace TSP
 
     class PriorityQueue<T>
     {
-        internal class Node : IComparable<Node>
+		public int shelf = 0;
+
+		internal class Node : IComparable<Node>
         {
             public int Priority;
             public T O;
