@@ -21,105 +21,11 @@ namespace TSP
             /// for your node data structure and search algorithm. 
             /// </summary>
             public ArrayList Route;
-            public double greedySolutionCost = 0;
-            public List<PriorityQueue<State>> queues = new List<PriorityQueue<State>>();
 
-			public void initQueues()
-			{
-				List<Double> multipliers = new List<Double>() { .6, .8, 1.0, 1.2, 1.4 };
-				for (int i = 0; i < 5; i++)
-				{
-					queues.Add(createQueue(multipliers[i]));
-				}
-			}
-			public PriorityQueue<State> createQueue(Double multiplier)
-			{
-				PriorityQueue<State> pQueue = new PriorityQueue<State>();
-				pQueue.shelf = (int) Math.Floor(this.greedySolutionCost * multiplier);
-				return pQueue;
-			}
-			public class State
-			{
-				public double[][] matrix;
-				public int[] edges;
-				public double lowerbound;
-				public int nextFrom, nextTo;
-				public int[] entered, exited;
-
-				public State(double[][] matrix, int[] edges, double lowerbound)
-				{
-					this.matrix = matrix;
-					this.edges = edges;
-					this.lowerbound = lowerbound;
-				}
-
-				// copy constructor
-				public State(State original)
-				{
-					matrix = copyArray(original.matrix);
-					edges = (int[])original.edges.Clone();
-					lowerbound = original.lowerbound;
-					nextFrom = original.nextFrom;
-					nextTo = original.nextTo;
-					entered = (int[])original.entered.Clone();
-					exited = (int[])original.exited.Clone();
-				}
-
-				public int EdgesFound
-				{
-					get { return getNumOfEdgesFound(); }
-				}
-
-				public int getNumOfEdgesFound()
-				{
-					int count = 0;
-					foreach (var edge in edges)
-					{
-						if (edge != -1)
-						{
-							count++;
-						}
-					}
-					return count;
-				}
-
-				public double[][] copyArray(double[][] source)
-				{
-					var len = source.Length;
-					var dest = new double[len][];
-
-					for (int i = 0; i < len; i++)
-					{
-						var inner = source[i];
-						var ilen = inner.Length;
-						var newer = new double[ilen];
-						Array.Copy(inner, newer, ilen);
-						dest[i] = newer;
-					}
-
-					return dest;
-				}
-
-				public void printMatrix()
-				{
-					for (int i = 0; i < matrix.Length; i++)
-					{
-						for (int j = 0; j < matrix.Length; j++)
-						{
-							Console.Write(matrix[i][j] + "\t");
-						}
-						Console.WriteLine();
-					}
-					Console.WriteLine();
-
-				}
-			}
-
-			public TSPSolution(ArrayList iroute)
+            public TSPSolution(ArrayList iroute)
             {
                 Route = new ArrayList(iroute);
             }
-
 
             /// <summary>
             /// Compute the cost of the current route.  
@@ -215,6 +121,10 @@ namespace TSP
         {
             get { return _seed; }
         }
+
+        public double greedySolutionCost { get; set; }
+
+        public List<PriorityQueue<State>> queues { get; set; }
         #endregion
 
         #region Constructors
@@ -387,11 +297,30 @@ namespace TSP
                 return -1D; 
         }
 
+        public void initQueues()
+        {
+            queues = new List<PriorityQueue<State>>();
+            List<Double> multipliers = new List<Double>() { .6, .8, 1.0, 1.2, 1.4 };
+            for (int i = 0; i < 5; i++)
+            {
+                queues.Add(createQueue(multipliers[i]));
+            }
+        }
+
+        public PriorityQueue<State> createQueue(Double multiplier)
+        {
+            PriorityQueue<State> pQueue = new PriorityQueue<State>();
+            pQueue.shelf = (int)Math.Floor(this.greedySolutionCost * multiplier);
+            return pQueue;
+        }
+
+        /// <summary>
+        ///  Iterates over a variety of different greedy solutions and selects the best one. 
+        /// </summary>
+        /// <returns></returns>
         public void greedySolution(bool usingForBssf = false)
         {
             Random r = new Random();
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
 
             for (int total = 0; total < 10; total++)
             {
@@ -428,11 +357,9 @@ namespace TSP
                 }
                 if (bssf == null || bssf.costOfRoute() > temp.costOfRoute())
                     bssf = temp;
-
             }
-            timer.Stop();
-            if (!usingForBssf)
-                updateForm(timer);
+
+            this.greedySolutionCost = bssf.costOfRoute();
             return;
         }
 
@@ -443,9 +370,6 @@ namespace TSP
             Route.Add(Cities[generator.Next(Cities.Length)]);
 
             int unreachableCities = 0;
-
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
 
             while (Route.Count < Cities.Length)
             {
