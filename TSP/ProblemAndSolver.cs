@@ -132,7 +132,7 @@ namespace TSP
 
         public double greedySolutionCost { get; set; }
 
-        public List<PriorityQueue<int[]>> queues { get; set; }
+        public List<PriorityQueue<List<int>>> queues { get; set; }
         #endregion
 
         #region Constructors
@@ -307,7 +307,7 @@ namespace TSP
 
         public void initQueues()
         {
-            queues = new List<PriorityQueue<int[]>>();
+            queues = new List<PriorityQueue<List<int>>>();
             List<Double> multipliers = new List<Double>() { .6, .8, 1.0, 1.2, 1.4 };
             for (int i = 0; i < 5; i++)
             {
@@ -315,10 +315,9 @@ namespace TSP
             }
         }
 
-        public PriorityQueue<int[]> createQueue(Double multiplier)
+        public PriorityQueue<List<int>> createQueue(Double multiplier)
         {
-            //TODO: Should write method for adding into queues
-            PriorityQueue<int[]> pQueue = new PriorityQueue<int[]>();
+            PriorityQueue<List<int>> pQueue = new PriorityQueue<List<int>>();
             pQueue.shelf = (int)Math.Floor(this.greedySolutionCost * multiplier);
             return pQueue;
         }
@@ -464,6 +463,48 @@ namespace TSP
             }
             return randomResults;
         }
+
+		public void initialize(List<List<int>> population)
+		{
+			for (int i = 0; i < population.Count; i++)
+			{
+				addToQueue(evaluate(population[i]), population[i]);
+			}
+		}
+
+		public void addToQueue(Double costOfRoute, List<int> route)
+		{
+			for(int i=0; i < queues.Count; i++)
+			{
+				if(costOfRoute < queues[i].shelf)
+				{
+					if(costOfRoute < bssf.cost)
+					{
+						ArrayList newSolution = new ArrayList();
+						for (int j=0; j< route.Count; j++)
+						{
+							newSolution.Add(Cities[route[i]]);
+						}
+						this.bssf = new TSPSolution(newSolution);
+						bssf.cost = costOfRoute;
+					}
+					queues[i].Add((int)costOfRoute,route);
+				}
+			}
+
+		}
+
+		public Double evaluate(List<int> route)
+		{
+			Double totalCost = 0;
+			for (int i=0; i < route.Count; i++)
+			{
+				totalCost = this.Cities[route[i]].costToGetTo(Cities[route[i + 1]]);
+				if (totalCost == Double.PositiveInfinity)
+					return totalCost;
+			}
+			return totalCost;
+		}
 
         /// <summary>
         ///  solve the problem.  This is the entry point for the solver when the run button is clicked
