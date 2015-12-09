@@ -322,10 +322,11 @@ namespace TSP
             return pQueue;
         }
 
-        public void crossOver(List<List<int>> parents, int numSwaps)
+        public List<List<int>> crossOver(List<List<int>> parents, int numSwaps)
         {
             Random r = new Random();
-            while(parents.Count > 1)
+            List<List<int>> children = new List<List<int>>();
+            while (parents.Count > 1)
             {
                 List<int> child1 = new List<int>(parents[0]);
                 List<int> child2 = new List<int>(parents[1]);
@@ -342,12 +343,13 @@ namespace TSP
                     child1[swapIndex] = child2[swapIndex];
                     child2[swapIndex] = temp;
                 }
-
-                //TODO: push children into queues.
+                children.Add(child1);
+                children.Add(child2);
             } 
+            return children;
         }
 
-        public void mutate(List<List<int>> parents, double likelihood, int numSwaps)
+        public void mutate(List<List<int>> parents, int numSwaps, double likelihood = 0.5)
         {
             Random r = new Random();
             foreach (List<int> parent in parents)
@@ -356,8 +358,14 @@ namespace TSP
                 {
                     for (int i = 0; i < numSwaps; i++)
         {
-                        int swapIndex1 = r.Next();
-                        int swapIndex2 = r.Next();
+                        int swapIndex1 = r.Next(Cities.Length);
+                        int swapIndex2 = r.Next(Cities.Length);
+
+                        if(swapIndex1 == swapIndex2)
+                        {
+                            i--;
+                            continue;
+                        }
 
                         int temp = parent[swapIndex1];
                         parent[swapIndex1] = parent[swapIndex2];
