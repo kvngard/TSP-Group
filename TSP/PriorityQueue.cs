@@ -65,7 +65,7 @@ namespace TSP
 
     class PriorityQueue<T>
     {
-		public int shelf = 0;
+		public Double shelf = 0;
 
 		internal class Node : IComparable<Node>
         {
