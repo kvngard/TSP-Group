@@ -493,6 +493,7 @@ namespace TSP
 					queues[i].Add((int)costOfRoute,route);
 				}
 			}
+
 		}
 
 		public Double evaluate(List<int> route)
@@ -505,6 +506,24 @@ namespace TSP
 					return totalCost;
 			}
 			return totalCost;
+		}
+
+		public List<List<int>> drawParents(int numParents)
+		{
+			List<List<int>> parents = new List<List<int>>();
+			Random r = new Random();
+			for (int i = 0; i < numParents; i++)
+			{
+				double swtch = r.NextDouble();
+
+				if (swtch < 0.5) parents.Add(queues[0].RemoveMin());
+				else if (swtch < 0.7) parents.Add(queues[1].RemoveMin());
+				else if (swtch < 0.85) parents.Add(queues[2].RemoveMin());
+				else if (swtch < 0.97) parents.Add(queues[3].RemoveMin());
+				else if (swtch < 0.99) parents.Add(queues[4].RemoveMin());
+
+			}
+			return parents;
 		}
 
 		public void Select(List<List<int>> children, int numSurvivors)//todo: possible refactor here. heavy cost. possible state will help here
