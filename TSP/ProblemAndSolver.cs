@@ -34,7 +34,7 @@ namespace TSP
 				}
 			}
 			public PriorityQueue<State> createQueue(Double multiplier)
-			{
+			{ 
 				PriorityQueue<State> pQueue = new PriorityQueue<State>();
 				pQueue.shelf = (int) Math.Floor(this.greedySolution * multiplier);
 				return pQueue;
