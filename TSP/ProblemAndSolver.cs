@@ -345,7 +345,7 @@ namespace TSP
                 }
                 children.Add(child1);
                 children.Add(child2);
-            } 
+            }
             return children;
         }
 
@@ -357,7 +357,7 @@ namespace TSP
                 if(r.NextDouble() < likelihood)
                 {
                     for (int i = 0; i < numSwaps; i++)
-        {
+                    {
                         int swapIndex1 = r.Next(Cities.Length);
                         int swapIndex2 = r.Next(Cities.Length);
 
@@ -493,6 +493,7 @@ namespace TSP
 					queues[i].Add((int)costOfRoute,route);
 				}
 			}
+
 		}
 
 		public Double evaluate(List<int> route)
@@ -507,48 +508,24 @@ namespace TSP
 			return totalCost;
 		}
 
-		public void Select(List<List<int>> children, int numSurvivors)//todo: possible refactor here. heavy cost. possible state will help here
-		{
-			if(numSurvivors > children.Count)
-			{
-				numSurvivors = children.Count;
-			}
+        public List<List<int>> drawParents(int numParents)
+        {
+            List<List<int>> parents = new List<List<int>>();
+            Random r = new Random();
+            for (int i = 0; i < numParents; i++)
+            {
+                double swtch = r.NextDouble();
 
-			Double sum = 0;
-			List<Double> costs = new List<Double>();
-			List<Double> percentages = new List<Double>();
-			for(int i = 0; i< children.Count; i++)
-			{
-				sum += evaluate(children[i]);
-			}
-			for (int i=0; i< children.Count; i++)
-			{
-				percentages[i] = 1 - (costs[i]/sum);
-			}
+                if (swtch < 0.5) parents.Add(queues[0].RemoveMin());
+                else if (swtch < 0.7) parents.Add(queues[1].RemoveMin());
+                else if (swtch < 0.85) parents.Add(queues[2].RemoveMin());
+                else if (swtch < 0.97) parents.Add(queues[3].RemoveMin());
+                else if (swtch < 0.99) parents.Add(queues[4].RemoveMin());
 
-			List<int> survivors = new List<int>();
-			costs = new List<Double>();
-			int counter = 0;
-			Random r = new Random();
-			int tempValue = 0;
-			while (survivors.Count < numSurvivors)
-			{
-				tempValue = r.Next(children.Count);
-				while(survivors.Contains(tempValue))
-				{
-					tempValue = r.Next(children.Count);
-				}
-				survivors.Add(tempValue);
-				
-			}
+            }
+            return parents;
+        }
 
-			for(int i=0; i < survivors.Count; i++)
-			{
-				addToQueue(costs[survivors[i]], children[survivors[i]]);
-			}
-		}
-
-		int
         /// <summary>
         ///  solve the problem.  This is the entry point for the solver when the run button is clicked
         /// right now it just picks a simple solution. 
