@@ -472,7 +472,7 @@ namespace TSP
 			{
 				if(costOfRoute < queues[i].shelf)
 				{
-					if(costOfRoute < this.cost)
+					if(costOfRoute < bssf.cost)
 					{
 						ArrayList newSolution = new ArrayList();
 						for (int j=0; j< route.Count; j++)
@@ -480,12 +480,11 @@ namespace TSP
 							newSolution.Add(Cities[route[i]]);
 						}
 						this.bssf = new TSPSolution(newSolution);
-						this.cost = costOfRoute;
+						bssf.cost = costOfRoute;
 					}
 					queues[i].Add((int)costOfRoute,route);
 				}
 			}
-
 		}
 
 		public Double evaluate(List<int> route)
@@ -500,6 +499,48 @@ namespace TSP
 			return totalCost;
 		}
 
+		public void Select(List<List<int>> children, int numSurvivors)//todo: possible refactor here. heavy cost. possible state will help here
+		{
+			if(numSurvivors > children.Count)
+			{
+				numSurvivors = children.Count;
+			}
+
+			Double sum = 0;
+			List<Double> costs = new List<Double>();
+			List<Double> percentages = new List<Double>();
+			for(int i = 0; i< children.Count; i++)
+			{
+				sum += evaluate(children[i]);
+			}
+			for (int i=0; i< children.Count; i++)
+			{
+				percentages[i] = 1 - (costs[i]/sum);
+			}
+
+			List<int> survivors = new List<int>();
+			costs = new List<Double>();
+			int counter = 0;
+			Random r = new Random();
+			int tempValue = 0;
+			while (survivors.Count < numSurvivors)
+			{
+				tempValue = r.Next(children.Count);
+				while(survivors.Contains(tempValue))
+				{
+					tempValue = r.Next(children.Count);
+				}
+				survivors.Add(tempValue);
+				
+			}
+
+			for(int i=0; i < survivors.Count; i++)
+			{
+				addToQueue(costs[survivors[i]], children[survivors[i]]);
+			}
+		}
+
+		int
         /// <summary>
         ///  solve the problem.  This is the entry point for the solver when the run button is clicked
         /// right now it just picks a simple solution. 
