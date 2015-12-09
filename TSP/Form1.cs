@@ -168,7 +168,7 @@ namespace TSP
         private void randomToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             this.reset();
-            CityData.randomSolution();
+            CityData.generateRandom(CityData.Seed);
         }
 
         private void yourTSPToolStripMenuItem1_Click(object sender, EventArgs e)

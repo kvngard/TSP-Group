@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TSP
 {
-    public class State
+    public class bbState
     {
         public double[][] matrix;
         public int[] edges;
@@ -13,7 +13,7 @@ namespace TSP
         public int nextFrom, nextTo;
         public int[] entered, exited;
 
-        public State(double[][] matrix, int[] edges, double lowerbound)
+        public bbState(double[][] matrix, int[] edges, double lowerbound)
         {
             this.matrix = matrix;
             this.edges = edges;
@@ -21,7 +21,7 @@ namespace TSP
         }
 
         // copy constructor
-        public State(State original)
+        public bbState(bbState original)
         {
             matrix = copyArray(original.matrix);
             edges = (int[])original.edges.Clone();
