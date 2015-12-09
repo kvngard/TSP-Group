@@ -528,7 +528,7 @@ namespace TSP
 
 			List<int> survivors = new List<int>();
 			costs = new List<Double>();
-			int counter = 0;
+			
 			Random r = new Random();
 			int tempValue = 0;
 			while (survivors.Count < numSurvivors)
