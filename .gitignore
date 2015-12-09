@@ -22,10 +22,15 @@ bld/
 [Bb]in/
 [Oo]bj/
 
+<<<<<<< HEAD
 # Visual Studio 2015 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
+=======
+# Visual Studo 2015 cache/options directory
+.vs/
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -40,10 +45,13 @@ TestResult.xml
 [Rr]eleasePS/
 dlldata.c
 
+<<<<<<< HEAD
 # DNX
 project.lock.json
 artifacts/
 
+=======
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
 *_i.c
 *_p.c
 *_i.h
@@ -76,7 +84,10 @@ _Chutzpah*
 ipch/
 *.aps
 *.ncb
+<<<<<<< HEAD
 *.opendb
+=======
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
 *.opensdf
 *.sdf
 *.cachefile
@@ -85,7 +96,10 @@ ipch/
 *.psess
 *.vsp
 *.vspx
+<<<<<<< HEAD
 *.sap
+=======
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
 
 # TFS 2012 Local Workspace
 $tf/
@@ -98,7 +112,11 @@ _ReSharper*/
 *.[Rr]e[Ss]harper
 *.DotSettings.user
 
+<<<<<<< HEAD
 # JustCode is a .NET coding add-in
+=======
+# JustCode is a .NET coding addin-in
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
 .JustCode
 
 # TeamCity is a build add-in
@@ -110,7 +128,10 @@ _TeamCity*
 # NCrunch
 _NCrunch_*
 .*crunch*.local.xml
+<<<<<<< HEAD
 nCrunchTemp_*
+=======
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
 
 # MightyMoose
 *.mm.*
@@ -156,6 +177,7 @@ publish/
 csx/
 *.build.csdef
 
+<<<<<<< HEAD
 # Windows Azure Emulator
 ecf/
 rcf/
@@ -170,6 +192,13 @@ AppPackages/
 !*.[Cc]ache/
 
 # Others
+=======
+# Windows Store app package directory
+AppPackages/
+
+# Others
+*.[Cc]ache
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
 ClientBin/
 [Ss]tyle[Cc]op.*
 ~$*
@@ -179,7 +208,11 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
+<<<<<<< HEAD
 orleans.codegen.cs
+=======
+bower_components/
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
 
 # RIA/Silverlight projects
 Generated_Code/
@@ -204,9 +237,12 @@ UpgradeLog*.htm
 # Microsoft Fakes
 FakesAssemblies/
 
+<<<<<<< HEAD
 # GhostDoc plugin setting file
 *.GhostDoc.xml
 
+=======
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 
@@ -215,6 +251,7 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+<<<<<<< HEAD
 
 # Visual Studio LightSwitch build output
 **/*.HTMLClient/GeneratedArtifacts
@@ -229,3 +266,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+=======
+>>>>>>> 67bef6d0095a3f46958717e81022aed1cb29ab34
