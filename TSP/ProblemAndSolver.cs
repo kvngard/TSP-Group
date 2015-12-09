@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 using System.Diagnostics;
+using System.Linq;
 
 namespace TSP
 {
@@ -20,19 +21,11 @@ namespace TSP
             /// You are, of course, free to use a different representation if it would be more convenient or efficient 
             /// for your node data structure and search algorithm. 
             /// </summary>
-            public ArrayList Route;
-            public double cost {
-                get
-                {
-                    if (cost == double.PositiveInfinity) cost = costOfRoute();
-                    return cost;
-                }
-                set { } }            
+            public ArrayList Route;          
 
 			public TSPSolution(ArrayList iroute)
             {
                 Route = new ArrayList(iroute);
-                cost = double.PositiveInfinity;
             }
 
             /// <summary>
@@ -326,15 +319,12 @@ namespace TSP
         {
             Random r = new Random();
             List<List<int>> children = new List<List<int>>();
-            while (parents.Count > 1)
+            for(int i = 0; i < parents.Count-1; i++)
             {
-                List<int> child1 = new List<int>(parents[0]);
-                List<int> child2 = new List<int>(parents[1]);
+                List<int> child1 = new List<int>(parents[i]);
+                List<int> child2 = new List<int>(parents[i+1]);
 
-                parents.RemoveAt(0);
-                parents.RemoveAt(1);
-
-                for (int i = 0; i < numSwaps; i++)
+                for (int j = 0; j < numSwaps; j++)
                 {
                     int swapIndex = r.Next(Cities.Length);
                     int temp = 0;
@@ -343,8 +333,10 @@ namespace TSP
                     child1[swapIndex] = child2[swapIndex];
                     child2[swapIndex] = temp;
                 }
-                children.Add(child1);
-                children.Add(child2);
+                if(child1.Distinct().Count() == child1.Count())
+                    children.Add(child1);
+                if (child2.Distinct().Count() == child2.Count())
+                    children.Add(child2);
             } 
             return children;
         }
@@ -357,7 +349,7 @@ namespace TSP
                 if(r.NextDouble() < likelihood)
                 {
                     for (int i = 0; i < numSwaps; i++)
-        {
+                    {
                         int swapIndex1 = r.Next(Cities.Length);
                         int swapIndex2 = r.Next(Cities.Length);
 
@@ -474,38 +466,44 @@ namespace TSP
 			}
 		}
 
-		public void addToQueue(Double costOfRoute, List<int> route)
+		public bool addToQueue(Double costOfRoute, List<int> route)
 		{
+            if (costOfRoute == double.PositiveInfinity)
+                return false;
+
+            bool update = false;
 			for(int i=0; i < queues.Count; i++)
 			{
 				if(costOfRoute < queues[i].shelf)
 				{
-					if(costOfRoute < bssf.cost)
+                    if (costOfRoute < bssf.costOfRoute())
 					{
 						ArrayList newSolution = new ArrayList();
 						for (int j=0; j< route.Count; j++)
 						{
-							newSolution.Add(Cities[route[i]]);
+							newSolution.Add(Cities[route[j]]);
 						}
-						this.bssf = new TSPSolution(newSolution);
-						bssf.cost = costOfRoute;
+						bssf = new TSPSolution(newSolution);
+                        double funCOst = bssf.costOfRoute();
+                        update = true;
 					}
 					queues[i].Add((int)costOfRoute,route);
+                    break;
 				}
 			}
+            return update;
 
 		}
 
 		public Double evaluate(List<int> route)
 		{
-			Double totalCost = 0;
+            Route.Clear();
 			for (int i=0; i < route.Count; i++)
 			{
-				totalCost = this.Cities[route[i]].costToGetTo(Cities[route[i + 1]]);
-				if (totalCost == Double.PositiveInfinity)
-					return totalCost;
+                Route.Add(Cities[route[i]]);
 			}
-			return totalCost;
+            TSPSolution temp = new TSPSolution(Route);
+            return temp.costOfRoute();
 		}
 
 		public List<List<int>> drawParents(int numParents)
@@ -516,56 +514,101 @@ namespace TSP
 			{
 				double swtch = r.NextDouble();
 
-				if (swtch < 0.5) parents.Add(queues[0].RemoveMin());
-				else if (swtch < 0.7) parents.Add(queues[1].RemoveMin());
-				else if (swtch < 0.85) parents.Add(queues[2].RemoveMin());
-				else if (swtch < 0.97) parents.Add(queues[3].RemoveMin());
-				else if (swtch < 0.99) parents.Add(queues[4].RemoveMin());
+				if (swtch < 0.5 && queues[0].Count != 0) parents.Add(queues[0].RemoveMin());
+				else if (swtch < 0.7 && queues[1].Count != 0) parents.Add(queues[1].RemoveMin());
+				else if (swtch < 0.85 && queues[2].Count != 0) parents.Add(queues[2].RemoveMin());
+				else if (swtch < 0.97 && queues[3].Count != 0) parents.Add(queues[3].RemoveMin());
+				else if (swtch < 0.99 && queues[4].Count != 0) parents.Add(queues[4].RemoveMin());
 
 			}
 			return parents;
 		}
 
-		public void Select(List<List<int>> children, int numSurvivors)//todo: possible refactor here. heavy cost. possible state will help here
+		public bool Select(List<List<int>> children, int numSurvivors)//todo: possible refactor here. heavy cost. possible state will help here
 		{
-			if(numSurvivors > children.Count)
+			if(numSurvivors > children.Count - 1)
 			{
-				numSurvivors = children.Count;
+				numSurvivors = children.Count - 1;
 			}
 
-			Double sum = 0;
-			List<Double> costs = new List<Double>();
-			List<Double> percentages = new List<Double>();
-			for(int i = 0; i< children.Count; i++)
+            SortedList<double, List<int>> ChildCosts = new SortedList<double, List<int>>();
+            SortedList<double, List<int>> ChildPercentages = new SortedList<double, List<int>>();
+
+            Double sum = 0;
+            //List<Double> costs = new List<Double>();
+            List<Double> percentages = new List<Double>();
+            for (int i = 0; i < children.Count; i++)
+            {
+                double cost = evaluate(children[i]);
+                if (ChildCosts.ContainsKey(cost) || cost == double.PositiveInfinity)
+                {
+                    numSurvivors--;
+                    continue;
+                }
+
+                ChildCosts.Add(cost, children[i]);
+
+                if (!double.IsPositiveInfinity(cost))
+                    sum += cost;
+            }
+   //         double percentSum = 0;
+   //         for (int i = 0; i < ChildCosts.Count; i++)
+   //         {
+   //             ChildPercentages.Add(1 - ChildCosts.Keys[i] / sum, children[i]);
+   //         }
+
+   //         List<List<int>> survivors = new List<List<int>>();
+   //         //costs = new List<Double>();
+
+   //         Random r = new Random();
+   //         double tempValue = 0;
+
+   //         while (survivors.Count < numSurvivors)
+			//{
+			//	tempValue = r.NextDouble();
+
+   //             for (int i = 1; i < ChildCosts.Count; i++)
+   //             {
+   //                 if (tempValue > ChildPercentages.Keys[i])
+   //                 {
+   //                     if(survivors.Contains((ChildCosts[ChildCosts.Keys[i - 1]])))
+   //                         break;
+   //                     survivors.Add(ChildCosts[ChildCosts.Keys[i - 1]]);
+   //                 }
+   //             }
+			//}
+
+            bool updated = false;
+			for(int i=0; i < numSurvivors; i++)
 			{
-				sum += evaluate(children[i]);
-			}
-			for (int i=0; i< children.Count; i++)
-			{
-				percentages[i] = 1 - (costs[i]/sum);
+                updated = addToQueue(ChildCosts.Keys[i], ChildCosts.Values[i]);
 			}
 
-			List<int> survivors = new List<int>();
-			costs = new List<Double>();
-			
-			Random r = new Random();
-			int tempValue = 0;
-			while (survivors.Count < numSurvivors)
-			{
-				tempValue = r.Next(children.Count);
-				while(survivors.Contains(tempValue))
-				{
-					tempValue = r.Next(children.Count);
-				}
-				survivors.Add(tempValue);
-				
-			}
-
-			for(int i=0; i < survivors.Count; i++)
-			{
-				addToQueue(costs[survivors[i]], children[survivors[i]]);
-			}
+            return updated;
 		}
+
+        public void geneticAlgorithm()
+        {
+            greedySolution();
+            initQueues();
+            initialize(generateRandom(1000));
+            int genWithoutChange = 0;
+
+            while (genWithoutChange < 15)
+            {
+                List<List<int>> parents = drawParents(10);
+                List<List<int>> children = crossOver(parents, 3);
+                mutate(parents, 3, .75);
+                children.AddRange(parents);
+                //This returns a boolean value showing that the bssf was updated by one of the children we created.
+                bool updated = Select(children, 12);
+
+                if(!updated)
+                    genWithoutChange++;
+            }
+
+            updateForm();
+        }
 
         /// <summary>
         ///  solve the problem.  This is the entry point for the solver when the run button is clicked
