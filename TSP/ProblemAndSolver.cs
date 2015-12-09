@@ -29,7 +29,7 @@ namespace TSP
                 }
                 set { } }            
 
-            public TSPSolution(ArrayList iroute)
+			public TSPSolution(ArrayList iroute)
             {
                 Route = new ArrayList(iroute);
                 cost = double.PositiveInfinity;
@@ -415,7 +415,7 @@ namespace TSP
 
             this.greedySolutionCost = bssf.costOfRoute();
             return;
-        }
+            }
 
         public List<List<int>> generateRandom(int n)
         {
