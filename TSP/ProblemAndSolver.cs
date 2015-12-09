@@ -13,7 +13,6 @@ namespace TSP
 
         private class TSPSolution
         {
-			Double greedySolution = 0;
             /// <summary>
             /// we use the representation [cityB,cityA,cityC] 
             /// to mean that cityB is the first city in the solution, cityA is the second, cityC is the third 
@@ -21,9 +20,9 @@ namespace TSP
             /// You are, of course, free to use a different representation if it would be more convenient or efficient 
             /// for your node data structure and search algorithm. 
             /// </summary>
-            public ArrayList
-                Route;
-			public List<PriorityQueue<State>> queues = new List<PriorityQueue<State>>();
+            public ArrayList Route;
+            public double greedySolutionCost = 0;
+            public List<PriorityQueue<State>> queues = new List<PriorityQueue<State>>();
 
 			public void initQueues()
 			{
@@ -36,7 +35,7 @@ namespace TSP
 			public PriorityQueue<State> createQueue(Double multiplier)
 			{
 				PriorityQueue<State> pQueue = new PriorityQueue<State>();
-				pQueue.shelf = (int) Math.Floor(this.greedySolution * multiplier);
+				pQueue.shelf = (int) Math.Floor(this.greedySolutionCost * multiplier);
 				return pQueue;
 			}
 			public class State
@@ -432,9 +431,49 @@ namespace TSP
 
             }
             timer.Stop();
-
             if (!usingForBssf)
                 updateForm(timer);
+            return;
+        }
+
+        public void randomSolution()
+        {
+            Route.Clear();
+            Random generator = new Random();
+            Route.Add(Cities[generator.Next(Cities.Length)]);
+
+            int unreachableCities = 0;
+
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+
+            while (Route.Count < Cities.Length)
+            {
+                City newCity = Cities[generator.Next(Cities.Length)];
+                if (Route.Contains(newCity))
+                    continue;
+
+                //Make sure that the node is reachable.
+                double cost = ((City)Route[Route.Count - 1]).costToGetTo(newCity);
+                if (cost != double.PositiveInfinity)
+                {
+                    Route.Add(newCity);
+                }
+                else
+                {
+                    //If not, increment the unreachable cities counter.
+                    //If this exceeds the number of cities, start over again.
+                    unreachableCities++;
+                    if (unreachableCities > Cities.Length)
+                    {
+                        unreachableCities = 0;
+                        Route.Clear();
+                        Route.Add(Cities[generator.Next(Cities.Length)]);
+                    }
+                }
+            }
+            
+            //Todo save random values.
             return;
         }
 
