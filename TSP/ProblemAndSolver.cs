@@ -297,39 +297,46 @@ namespace TSP
 
         public void greedySolution(bool usingForBssf = false)
         {
-            bool valid = false;
             Random r = new Random();
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
-            while (!valid)
+            for (int total = 0; total < 10; total++)
             {
-                Route.Clear();
-                int currentIndex = r.Next(Cities.Length);
-                Route.Add(Cities[currentIndex]);
+                bool valid = false;
+                TSPSolution temp = null;
 
-                while (Route.Count != Cities.Length)
+                while (!valid)
                 {
-                    double minDist = double.MaxValue;
-
-                    for (int i = 0; i < Cities.Length; i++)
-                    {
-                        if (Route.Contains(Cities[i]))
-                            continue;
-
-                        double dist = Cities[currentIndex].costToGetTo(Cities[i]);
-
-                        if (dist < minDist)
-                        {
-                            minDist = dist;
-                            currentIndex = i;
-                        }
-                    }
+                    Route.Clear();
+                    int currentIndex = r.Next(Cities.Length);
                     Route.Add(Cities[currentIndex]);
-                }
 
-                bssf = new TSPSolution(Route);
-                valid = bssf.costOfRoute() != double.PositiveInfinity;
+                    while (Route.Count != Cities.Length)
+                    {
+                        double minDist = double.MaxValue;
+
+                        for (int i = 0; i < Cities.Length; i++)
+                        {
+                            if (Route.Contains(Cities[i]))
+                                continue;
+
+                            double dist = Cities[currentIndex].costToGetTo(Cities[i]);
+
+                            if (dist < minDist)
+                            {
+                                minDist = dist;
+                                currentIndex = i;
+                            }
+                        }
+                        Route.Add(Cities[currentIndex]);
+                    }
+                    temp = new TSPSolution(Route);
+                    valid = temp.costOfRoute() != double.PositiveInfinity;
+                }
+                if (bssf == null || bssf.costOfRoute() > temp.costOfRoute())
+                    bssf = temp;
+
             }
             timer.Stop();
 
