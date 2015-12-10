@@ -589,6 +589,13 @@ namespace TSP
 
         public void geneticAlgorithm()
         {
+            GeneticAlgorithm algorithm = new GeneticAlgorithm(Cities);
+            Route = algorithm.solve();
+            bssf = new TSPSolution(Route);
+            updateForm(); 
+            Program.MainForm.Invalidate();
+
+            /*
             greedySolution();
             initQueues();
             initialize(generateRandom(1000));
@@ -608,6 +615,7 @@ namespace TSP
             }
 
             updateForm();
+            */
         }
 
         /// <summary>

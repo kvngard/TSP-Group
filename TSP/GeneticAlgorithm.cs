@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,73 +13,101 @@ namespace TSP
 
         private double bestCost = double.PositiveInfinity;
         private List<int> bestPath = new List<int>();
-<<<<<<< Updated upstream
 		private double mutationLikelihood;
-=======
+        private double crossOverLikelihood;
+        private int populationSize;
+        private int generationCount;
 
         Random random = new Random();
-
->>>>>>> Stashed changes
+        
         public GeneticAlgorithm(City[] cities)
         {
             this.cities = cities;
-			this.mutationLikelihood = .5;
+			this.mutationLikelihood = 0.1;
+            crossOverLikelihood = 0.5;
+            populationSize = cities.Count();
+            generationCount = cities.Count();
         }
 
         public ArrayList solve()
         {
-            var population = InitializePopulation(1000);
+            var population = InitializePopulation(populationSize);
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < generationCount; i++)
             {
                 var best = SelectBest(population);
 
-                var children = new SortedList<double, List<int>>();
+                var children = new SortedList<double, List<List<int>>>();
 
-                var parents = PickTwo(best);
+                while (best.Count >= 2)
+                {
+                    var parents = PickTwo(best);
 
-                var mom = parents.Item1;
-                var dad = parents.Item2;
+                    var mom = parents.Item1;
+                    var dad = parents.Item2;
 
-                var son = Mutate(CrossOver(mom, dad));
-                var daughter = Mutate(CrossOver(mom, dad));
+                    //for (int j = 0; j < 4; j++)
+                    int childrenCreated = 0;
+                    while (childrenCreated < 10)
+                    {
+                        var child = Mutate(CrossOver(mom, dad));
+                        double cost = ComputeCost(child);
+                        if (cost == double.PositiveInfinity) { continue; }
+                        if (!children.ContainsKey(cost)) { children[cost] = new List<List<int>>(); }
+                        children[cost].Add(child);
+                        childrenCreated++;
+                    }
 
-                children.Add(ComputeCost(son), son);
-                children.Add(ComputeCost(daughter), daughter);
+                }
 
                 var candidateCost = children.Keys.Min();
-                var candidatePath = children[candidateCost];
+                var candidatePath = children[candidateCost].First();
 
                 if (candidateCost < bestCost)
                 {
                     bestCost = candidateCost;
                     bestPath = candidatePath;
                 }
+
+                foreach (var e in population)
+                {
+                    if (!children.ContainsKey(e.Key)) { children[e.Key] = new List<List<int>>(); }
+                    foreach (var g in e.Value)
+                    {
+                        children[e.Key].Add(g);
+                    }
+                }
+
+                population = children;
             }
 
-            return null; // TODO CHANGE THIS MATT!!!!
+            return GenerateFinalTour(bestPath); 
         }
 
-        private Tuple<List<int>, List<int>> PickTwo(SortedList<double, List<int>> population)
+        private Tuple<List<int>, List<int>> PickTwo(SortedList<double, List<List<int>>> population)
         {
             List<int> mom, dad;
             IList<double> keys;
-            int index;
+            //int index;
             keys = population.Keys;
             
-            index = random.Next(population.Count);
-            mom = population[keys[index]];
+            var key = population.Keys[random.Next(population.Keys.Count)];
+            mom = population[key].First();
+            population[key].RemoveAt(0);
+            if (population[key].Count == 0) { population.Remove(key); }
 
-            index = random.Next(population.Count);
-            dad = population[keys[index]];
+            key = population.Keys[random.Next(population.Keys.Count)];
+            dad = population[key].First();
+            population[key].RemoveAt(0);
+            if (population[key].Count == 0) { population.Remove(key); }
 
             return Tuple.Create(mom, dad);
         }
 
-        private SortedList<double, List<int>> InitializePopulation(int popSize)
+        private SortedList<double, List<List<int>>> InitializePopulation(int popSize)
         {
 			//List<List<int>> randomResults = new List<List<int>>();
-			SortedList<double, List<int>> randomResults = new SortedList<double, List<int>>();
+			SortedList<double, List<List<int>>> randomResults = new SortedList<double, List<List<int>>>();
 			Random generator = new Random();
 
 			for (int i = 0; i < popSize; i++)
@@ -114,29 +142,66 @@ namespace TSP
 						}
 					}
 				}
-				Double finalCost = new ProblemAndSolver.TSPSolution(new ArrayList(generateFinalTour(Route).ToArray())).costOfRoute();
-				randomResults.Add(finalCost, Route);
+				Double finalCost = ComputeCost(Route);
+                if (finalCost == double.PositiveInfinity) { continue; }
+                //while (randomResults.ContainsKey(finalCost)) { finalCost += .001; }
+                if (!randomResults.ContainsKey(finalCost)) { randomResults[finalCost] = new List<List<int>>(); }
+                randomResults[finalCost].Add(Route);
 			}
 			return randomResults;
         }
 
-		public List<City> generateFinalTour(List<int> tour)
+		public ArrayList GenerateFinalTour(List<int> tour)
 		{
-			List<City> newList = new List<City>();
+			var newList = new ArrayList();
 			foreach (int index in tour)
 			{
-				newList.Add(cities[index - 1]);
+				newList.Add(cities[index]);
 			}
 			return newList;
 		}
 
-		private SortedList<double, List<int>> SelectBest(SortedList<double, List<int>> population)
-        {
-            return null;
-        }
-
         private List<int> CrossOver(List<int> _mom, List<int> _dad)
         {
+            List<int> child1 = new List<int>(_mom);
+            List<int> child2 = new List<int>(_dad);
+
+            List<int> child = null;
+
+            if (random.NextDouble() > crossOverLikelihood)
+            {
+                return random.Next(2) == 0 ? child1 : child2;
+            }
+
+
+            for (int j = 0; j < 3; j++)
+            {
+                int swapIndex = random.Next(cities.Length);
+                //int temp = 0;
+
+                int val1 = child1[swapIndex];
+                int val2 = child2[swapIndex];
+
+                int index1 = child1.IndexOf(val2);
+                int index2 = child2.IndexOf(val1);
+                
+                child1[index1] = val1;
+                child2[index2] = val2;
+
+                int temp = child1[swapIndex];
+                child1[swapIndex] = child2[swapIndex];
+                child2[swapIndex] = temp;
+            }
+
+            child = random.Next(2) == 0 ? child1 : child2;
+
+            if (child.Distinct().Count() != child.Count())
+            {
+                return new List<int>(_mom);
+            }
+            return child;
+
+            /*
             int[] mom = _mom.ToArray();
             int[] dad = _dad.ToArray();
             int[] child = (int[]) mom.Clone();
@@ -145,12 +210,6 @@ namespace TSP
             // crossover at a random position, up to a random length
             int startPos = random.Next(mom.Length);
             int crossCount = random.Next(mom.Length - startPos);
-
-            foreach (var item in child)
-            {
-                Console.Write(item + " ");
-
-            }
             Array.Copy(dad, startPos, child, startPos, crossCount);
 
 
@@ -199,42 +258,71 @@ namespace TSP
                 }
 
             }
-            Console.WriteLine();
-            foreach (var item in child)
-            {
-                Console.Write(item + " ");
-
-            }
-            Console.WriteLine();
-
-
             return new List<int>(child);
+            */
         }
 
-        private List<int> Mutate(List<int> gene)
+        private SortedList<double, List<List<int>>> SelectBest(SortedList<double, List<List<int>>> population)
         {
-			Random r = new Random();
-			if (r.NextDouble() < mutationLikelihood)
-			{
-				int swapIndex1 = r.Next(cities.Length);
-				int swapIndex2 = r.Next(cities.Length);
-			
-				while(swapIndex1 == swapIndex2)
-				{
-					swapIndex2 = r.Next(cities.Length);
-				}
+            var best = new SortedList<double, List<List<int>>>();
+            int count = populationSize / 2;
+            for (int i = 0; i < count * 3 / 4; i++)
+            {
+                var key = population.Keys.Min();
+                if (!best.ContainsKey(key)) { best[key] = new List<List<int>>(); }
+                best[key].Add(population[key].First());
+                population[key].RemoveAt(0);
+                if (population[key].Count == 0) { population.Remove(key); }
+            }
 
-				int temp = gene[swapIndex1];
-				gene[swapIndex1] = gene[swapIndex2];
-				gene[swapIndex2] = temp;
-					
-			}
-			return gene;
-		}
+            var rand = new Random();
+            while (Count(population) > 0 && Count(best) < count)
+            {
+                var key = population.Keys[rand.Next(population.Count)];
+                if (!best.ContainsKey(key)) { best[key] = new List<List<int>>(); }
+                best[key].Add(population[key].First());
+                population[key].RemoveAt(0);
+                if (population[key].Count == 0) { population.Remove(key); }
+            }
+            return best;
+        }
+
+        private int Count(SortedList<double, List<List<int>>> pop)
+        {
+            int total = 0;
+            foreach (var e in pop)
+            {
+                total += e.Value.Count();
+            }
+            return total;
+        }
+
+
+        private List<int> Mutate(List<int> gene_in)
+        {
+            List<int> gene = new List<int>(gene_in);
+            Random r = new Random();
+            if (r.NextDouble() < mutationLikelihood)
+            {
+                int swapIndex1 = r.Next(cities.Length);
+                int swapIndex2 = r.Next(cities.Length);
+
+                while (swapIndex1 == swapIndex2)
+                {
+                    swapIndex2 = r.Next(cities.Length);
+                }
+
+                int temp = gene[swapIndex1];
+                gene[swapIndex1] = gene[swapIndex2];
+                gene[swapIndex2] = temp;
+
+            }
+            return gene;
+        }
 
         private double ComputeCost(List<int> gene)
         {
-            return 0;
+            return new ProblemAndSolver.TSPSolution(new ArrayList(GenerateFinalTour(gene).ToArray())).costOfRoute();
         }
     }
 }
