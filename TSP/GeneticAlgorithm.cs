@@ -11,7 +11,8 @@ namespace TSP
     {
         private City[] cities;
 
-        private List<int> best;
+        private double bestCost = double.PositiveInfinity;
+        private List<int> bestPath = new List<int>();
 
         public GeneticAlgorithm(City[] cities)
         {
@@ -20,7 +21,41 @@ namespace TSP
 
         public ArrayList solve()
         {
-            return null;
+            var population = InitializePopulation(1000);
+            
+            for (int i = 0; i < 1000; i++)
+            {
+                var best = SelectBest(population);
+
+                var children = new SortedList<double, List<int>>();
+
+                var parents = PickTwo(best);
+
+                var mom = parents.Item1;
+                var dad = parents.Item2;
+
+                var son = Mutate(CrossOver(mom, dad));
+                var daughter = Mutate(CrossOver(mom, dad));
+
+                children.Add(ComputeCost(son), son);
+                children.Add(ComputeCost(daughter), daughter);
+
+                var candidateCost = children.Keys.Min();
+                var candidatePath = children[candidateCost];
+
+                if (candidateCost < bestCost)
+                {
+                    bestCost = candidateCost;
+                    bestPath = candidatePath;
+                }
+            }
+
+            return null; // TODO CHANGE THIS MATT!!!!
+        }
+
+        private Tuple<List<int>, List<int>> PickTwo(SortedList<double, List<int>> population)
+        {
+            return Tuple.Create(new List<int>(), new List<int>());
         }
 
         private SortedList<double, List<int>> InitializePopulation(int popSize)
@@ -113,6 +148,11 @@ namespace TSP
         private List<int> Mutate(List<int> gene)
         {
             return null;
+        }
+
+        private double ComputeCost(List<int> gene)
+        {
+            return 0;
         }
     }
 }
