@@ -13,10 +13,11 @@ namespace TSP
 
         private double bestCost = double.PositiveInfinity;
         private List<int> bestPath = new List<int>();
-
+		private double mutationLikelihood;
         public GeneticAlgorithm(City[] cities)
         {
             this.cities = cities;
+			this.mutationLikelihood = .5;
         }
 
         public ArrayList solve()
@@ -196,8 +197,24 @@ namespace TSP
 
         private List<int> Mutate(List<int> gene)
         {
-            return null;
-        }
+			Random r = new Random();
+			if (r.NextDouble() < mutationLikelihood)
+			{
+				int swapIndex1 = r.Next(cities.Length);
+				int swapIndex2 = r.Next(cities.Length);
+			
+				while(swapIndex1 == swapIndex2)
+				{
+					swapIndex2 = r.Next(cities.Length);
+				}
+
+				int temp = gene[swapIndex1];
+				gene[swapIndex1] = gene[swapIndex2];
+				gene[swapIndex2] = temp;
+					
+			}
+			return gene;
+		}
 
         private double ComputeCost(List<int> gene)
         {
