@@ -161,8 +161,8 @@ namespace TSP
 
         private void bBToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // TODO: Add a hook into your own implementation here.
-            throw new NotImplementedException();
+            this.reset();
+            CityData.BranchAndBoundAlgorithm();
         }
 
         private void randomToolStripMenuItem1_Click(object sender, EventArgs e)
