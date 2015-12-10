@@ -315,6 +315,78 @@ namespace TSP
             return pQueue;
         }
 
+        public void CrossOver(int[] parent1, int[] parent2)
+        {
+
+            Random random = new Random();
+            HashSet<int> availableCities = new HashSet<int>(parent1);
+            // crossover at a random position, up to a random length
+            int startPos = random.Next(parent1.Length);
+            int crossCount = random.Next(parent1.Length - startPos);
+
+            foreach (var item in parent1)
+            {
+                Console.Write(item + " ");
+
+            }
+            Array.Copy(parent2, startPos, parent1, startPos, crossCount);
+            
+
+            List<int> indicesWithDuplicates = null;
+
+            // we find out where the duplicates are and which cities have not crossed over.
+            for (int i = 0; i < parent1.Length; i++)
+            {
+                if (!availableCities.Remove(parent1[i]))
+                {
+                    if (indicesWithDuplicates == null)
+                    {
+                        indicesWithDuplicates = new List<int>();
+                    }
+
+                    indicesWithDuplicates.Add(i);
+                }
+            }
+
+            if (indicesWithDuplicates != null)
+            {
+                // now we replace duplicates with cities still left in availableCities
+
+                using (var indexIter = indicesWithDuplicates.GetEnumerator())
+                {
+                    using (var cityIter = availableCities.GetEnumerator())
+                    {
+                        while (true)
+                        {
+                            if (!indexIter.MoveNext())
+                            {
+                                // break if there all duplicates are accounted for
+                                break;
+                            }
+
+                            if (!cityIter.MoveNext())
+                            {
+                                // should not get here if there are no more duplicates
+                                // size of availableCities should equal indicesWithDuplicates
+                                throw new Exception("Not enough available cities");
+                            }
+                            // replace duplicates with cities that are still available
+                            parent1[indexIter.Current] = cityIter.Current;
+                        }
+                    }
+                }
+                
+            }
+            Console.WriteLine();
+            foreach (var item in parent1)
+            {
+                Console.Write(item + " ");
+
+            }
+            Console.WriteLine();
+
+        }
+
         public List<List<int>> crossOver(List<List<int>> parents, int numSwaps)
         {
             Random r = new Random();
@@ -374,7 +446,8 @@ namespace TSP
         public void greedySolution(bool usingForBssf = false)
         {
             Random r = new Random();
-
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             for (int total = 0; total < 10; total++)
             {
                 bool valid = false;
@@ -411,8 +484,10 @@ namespace TSP
                 if (bssf == null || bssf.costOfRoute() > temp.costOfRoute())
                     bssf = temp;
             }
+            stopwatch.Stop();
 
             this.greedySolutionCost = bssf.costOfRoute();
+            updateForm(stopwatch);
             return;
             }
 
@@ -420,11 +495,12 @@ namespace TSP
         {
             List<List<int>> randomResults = new List<List<int>>();
             Random generator = new Random();
-
-            for (int i = 0; i < n; i++)
-            {
-                List<int> Route = new List<int>();
-                Route.Add(generator.Next(Cities.Length));
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+            //for (int i = 0; i < n; i++)
+            //{
+                //List<int> Route = new List<int>();
+                Route.Add(Cities[generator.Next(Cities.Length)]);
 
                 int unreachableCities = 0;
 
@@ -435,7 +511,7 @@ namespace TSP
                         continue;
 
                     //Make sure that the node is reachable.
-                    double cost = Cities[Route[Route.Count - 1]].costToGetTo(Cities[newCity]);
+                    double cost = Cities[Route.Count - 1].costToGetTo(Cities[newCity]);
                     if (cost != double.PositiveInfinity)
                     {
                         Route.Add(newCity);
@@ -453,8 +529,12 @@ namespace TSP
                         }
                     }
                 }
-                randomResults.Add(Route);
-            }
+                bssf = new TSPSolution(Route);
+                //randomResults.Add(Route);
+            //}
+            timer.Stop();
+            updateForm(timer);
+
             return randomResults;
         }
 
@@ -587,6 +667,23 @@ namespace TSP
             return updated;
 		}
 
+        public void BranchAndBoundAlgorithm()
+        {
+            BranchAndBound bnb = new BranchAndBound(Cities);
+            Stopwatch stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+            bssf = bnb.Solve();
+            stopwatch.Stop();
+
+            // update the cost of the tour. 
+            Program.MainForm.tbCostOfTour.Text = " " + bssf.costOfRoute();
+            Program.MainForm.tbElapsedTime.Text = stopwatch.Elapsed.TotalSeconds.ToString();
+            // do a refresh. 
+            Program.MainForm.Invalidate();
+
+        }
+
         public void geneticAlgorithm()
         {
             Stopwatch timer = new Stopwatch();
@@ -595,9 +692,9 @@ namespace TSP
             Route = algorithm.solve();
             timer.Stop();
             Program.MainForm.tbElapsedTime.Text = timer.Elapsed.TotalSeconds.ToString();
-            
+
             bssf = new TSPSolution(Route);
-            updateForm(); 
+            updateForm();
             Program.MainForm.Invalidate();
 
             /*
@@ -605,7 +702,6 @@ namespace TSP
             initQueues();
             initialize(generateRandom(1000));
             int genWithoutChange = 0;
-
             while (genWithoutChange < 15)
             {
                 List<List<int>> parents = drawParents(10);
@@ -614,11 +710,9 @@ namespace TSP
                 children.AddRange(parents);
                 //This returns a boolean value showing that the bssf was updated by one of the children we created.
                 bool updated = Select(children, 12);
-
                 if(!updated)
                     genWithoutChange++;
             }
-
             updateForm();
             */
         }
@@ -644,6 +738,11 @@ namespace TSP
             Program.MainForm.Invalidate();
 
         }
+        #endregion
+
+        #region Genetic
+        PriorityQueue<TSPSolution> pq;
+        List<TSPSolution> fitList;
         #endregion
     }
 
