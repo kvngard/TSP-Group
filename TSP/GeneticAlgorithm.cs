@@ -13,7 +13,13 @@ namespace TSP
 
         private double bestCost = double.PositiveInfinity;
         private List<int> bestPath = new List<int>();
+<<<<<<< Updated upstream
 		private double mutationLikelihood;
+=======
+
+        Random random = new Random();
+
+>>>>>>> Stashed changes
         public GeneticAlgorithm(City[] cities)
         {
             this.cities = cities;
@@ -23,7 +29,7 @@ namespace TSP
         public ArrayList solve()
         {
             var population = InitializePopulation(1000);
-            
+
             for (int i = 0; i < 1000; i++)
             {
                 var best = SelectBest(population);
@@ -56,7 +62,18 @@ namespace TSP
 
         private Tuple<List<int>, List<int>> PickTwo(SortedList<double, List<int>> population)
         {
-            return Tuple.Create(new List<int>(), new List<int>());
+            List<int> mom, dad;
+            IList<double> keys;
+            int index;
+            keys = population.Keys;
+            
+            index = random.Next(population.Count);
+            mom = population[keys[index]];
+
+            index = random.Next(population.Count);
+            dad = population[keys[index]];
+
+            return Tuple.Create(mom, dad);
         }
 
         private SortedList<double, List<int>> InitializePopulation(int popSize)
@@ -120,30 +137,29 @@ namespace TSP
 
         private List<int> CrossOver(List<int> _mom, List<int> _dad)
         {
-            Random random = new Random();
-
             int[] mom = _mom.ToArray();
             int[] dad = _dad.ToArray();
+            int[] child = (int[]) mom.Clone();
 
             HashSet<int> availableCities = new HashSet<int>(mom);
             // crossover at a random position, up to a random length
             int startPos = random.Next(mom.Length);
             int crossCount = random.Next(mom.Length - startPos);
 
-            foreach (var item in mom)
+            foreach (var item in child)
             {
                 Console.Write(item + " ");
 
             }
-            Array.Copy(dad, startPos, mom, startPos, crossCount);
+            Array.Copy(dad, startPos, child, startPos, crossCount);
 
 
             List<int> indicesWithDuplicates = null;
 
             // we find out where the duplicates are and which cities have not crossed over.
-            for (int i = 0; i < mom.Length; i++)
+            for (int i = 0; i < child.Length; i++)
             {
-                if (!availableCities.Remove(mom[i]))
+                if (!availableCities.Remove(child[i]))
                 {
                     if (indicesWithDuplicates == null)
                     {
@@ -177,14 +193,14 @@ namespace TSP
                                 throw new Exception("Not enough available cities");
                             }
                             // replace duplicates with cities that are still available
-                            mom[indexIter.Current] = cityIter.Current;
+                            child[indexIter.Current] = cityIter.Current;
                         }
                     }
                 }
 
             }
             Console.WriteLine();
-            foreach (var item in mom)
+            foreach (var item in child)
             {
                 Console.Write(item + " ");
 
@@ -192,7 +208,7 @@ namespace TSP
             Console.WriteLine();
 
 
-            return null;
+            return new List<int>(child);
         }
 
         private List<int> Mutate(List<int> gene)
