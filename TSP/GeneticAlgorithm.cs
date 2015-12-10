@@ -20,10 +20,6 @@ namespace TSP
 
         public ArrayList solve()
         {
-            List<int> parent1 = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
-            List<int> parent2 = new List<int>() { 3, 4, 5, 1, 2, 8, 7, 6 };
-
-            CrossOver(parent1, parent2);
             return null;
         }
 
