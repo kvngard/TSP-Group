@@ -589,8 +589,13 @@ namespace TSP
 
         public void geneticAlgorithm()
         {
+            Stopwatch timer = new Stopwatch();
             GeneticAlgorithm algorithm = new GeneticAlgorithm(Cities);
+            timer.Start();
             Route = algorithm.solve();
+            timer.Stop();
+            Program.MainForm.tbElapsedTime.Text = timer.Elapsed.TotalSeconds.ToString();
+            
             bssf = new TSPSolution(Route);
             updateForm(); 
             Program.MainForm.Invalidate();

@@ -18,6 +18,10 @@ namespace TSP
         private int populationSize;
         private int generationCount;
 
+        private List<int> genOfUdates = new List<int>();
+        private List<int> bestCosts = new List<int>();
+        private int genSansUpdate = 0;
+
         Random random = new Random();
         
         public GeneticAlgorithm(City[] cities)
@@ -33,7 +37,9 @@ namespace TSP
         {
             var population = InitializePopulation(populationSize);
 
-            for (int i = 0; i < generationCount; i++)
+            //for (int i = 0; i < generationCount; i++)
+            int generation = 0;
+            while (genSansUpdate < 50)
             {
                 var best = SelectBest(population);
 
@@ -67,6 +73,12 @@ namespace TSP
                 {
                     bestCost = candidateCost;
                     bestPath = candidatePath;
+                    genOfUdates.Add(generation);
+                    bestCosts.Add((int) bestCost);
+                    genSansUpdate = 0;
+                } else
+                {
+                    genSansUpdate++;
                 }
 
                 foreach (var e in population)
@@ -79,6 +91,7 @@ namespace TSP
                 }
 
                 population = children;
+                generation++;
             }
 
             return GenerateFinalTour(bestPath); 
@@ -174,7 +187,7 @@ namespace TSP
             }
 
 
-            for (int j = 0; j < 3; j++)
+            for (int j = 0; j < cities.Length / 10; j++)
             {
                 int swapIndex = random.Next(cities.Length);
                 //int temp = 0;
@@ -286,6 +299,30 @@ namespace TSP
             }
             return best;
         }
+
+        /*
+        private SortedList<double, List<List<int>>> TournamentSelect(SortedList<double, List<List<int>>> population)
+        {
+            var best = new SortedList<double, List<List<int>>>();
+
+            while (Count(population) > 0 && Count(best) < populationSize / 2)
+            {
+                var bucketA = population[population.Keys[random.Next(population.Keys.Count())]];
+                var bucketB = population[population.Keys[random.Next(population.Keys.Count())]];
+            }
+
+            return best;
+        }
+
+        private Tuple<List<int>, double> randomGene(SortedList<double, List<List<int>>> population)
+        {
+
+            var bucketA = population[population.Keys[random.Next(population.Keys.Count())]];
+            return Tuple.Create(bucketA[random.Next(bucketA.Count())];
+        }
+        */
+            
+
 
         private int Count(SortedList<double, List<List<int>>> pop)
         {
