@@ -12,7 +12,7 @@ namespace TSP
     class ProblemAndSolver
     {
 
-        private class TSPSolution
+        public class TSPSolution
         {
             /// <summary>
             /// we use the representation [cityB,cityA,cityC] 
